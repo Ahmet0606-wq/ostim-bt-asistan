@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yönetim Paneli - Ostim BT Asistanı</title>
+  <style>
+   /* Genel Sayfa ve Arka Plan */
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(rgba(26, 43, 76, 0.75), rgba(26, 43, 76, 0.75)), url('/static/logo1.png') no-repeat center center fixed; 
+        background-size: cover; 
+        display: flex; justify-content: center; align-items: center; 
+        height: 100vh; margin: 0; overflow: hidden; 
+    }
+    
+    /* Logo Kesinlikle Sol Üstte Sabitlendi */
+    .main-logo { 
+        position: fixed; 
+        top: 20px; 
+        left: 30px; 
+        height: 60px; 
+        z-index: 1000; 
+        filter: drop-shadow(0px 3px 10px rgba(0,0,0,0.5)); 
+    }
+    
+    /* YENİ: Otomatik Yükseklik! (Kesilmeyi tamamen önler) */
+    .admin-container { 
+        width: 520px;  
+        height: auto; /* İçeriğin boyuna göre otomatik uzar */
+        max-height: 95vh; /* Ekrana sığmazsa diye maksimum sınır */
+        max-width: 95%; background: white; border-radius: 15px; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column;
+        resize: both; overflow: hidden; 
+        min-width: 450px; z-index: 10; 
+    }
+    
+    .admin-header { background-color: #1a2b4c; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; border-bottom: 4px solid #f39c12; cursor: move; flex-shrink: 0; }
+    
+    /* İçerik Boşlukları Daraltıldı (Küçük ekranlara sığması için) */
+    .admin-body { 
+        padding: 20px; display: flex; flex-direction: column; gap: 12px; 
+        overflow-y: auto; flex: 1; 
+        scrollbar-width: thin; scrollbar-color: #ccc #f8f9fa; 
+    }
+    
+    /* Beyaz Alan Scrollbar Tasarımı */
+    .admin-body::-webkit-scrollbar { width: 6px; }
+    .admin-body::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
+    .admin-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    
+    /* İstatistik Kartları */
+    .dashboard { display: flex; gap: 12px; margin-bottom: 2px; }
+    .stat-card { flex: 1; background: #f8f9fa; padding: 12px; border-radius: 10px; border-left: 5px solid #1a2b4c; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; }
+    .stat-card.orange { border-left-color: #f39c12; }
+    .stat-card.red { border-left-color: #dc3545; }
+    .stat-title { font-size: 11px; color: #666; font-weight: bold; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 1px;}
+    .stat-value { font-size: 24px; font-weight: bold; color: #1a2b4c; }
+    
+    /* Form Elemanları */
+    label { font-weight: 600; color: #333; font-size: 13px; margin-bottom: 2px; display: block; }
+    input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size: 13px; background-color: #f8f9fa; transition: all 0.3s ease; }
+    
+    /* YENİ: Textarea boyutu çok yer kaplamaması için sabitlendi */
+    textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; outline: none; font-size: 13px; background-color: #f8f9fa; transition: all 0.3s ease; height: 75px; resize: none; } 
+    
+    input[type="text"]:focus, textarea:focus { border-color: #1a2b4c; background-color: #fff; box-shadow: 0 0 5px rgba(26, 43, 76, 0.2); }
+    
+    .submit-btn { background-color: #f39c12; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background-color 0.3s; margin-top: 2px; }
+    .submit-btn:hover { background-color: #e67e22; }
+    
+    /* Gelen Kutusu */
+    .unanswered-box { background: #fff3cd; border-left: 5px solid #ffc107; padding: 12px; border-radius: 8px; margin-top: 5px; }
+    .unanswered-box h3 { margin-top: 0; color: #856404; font-size: 14px; margin-bottom: 8px;}
+    .question-item { background: white; padding: 8px; margin-bottom: 6px; border-radius: 5px; border: 1px solid #ffeeba; display: flex; justify-content: space-between; align-items: center;}
+    .delete-btn { background: #dc3545; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;}
+    .delete-btn:hover { background: #c82333; }
+    .copy-btn { background: #17a2b8; color: white; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-right: 5px;}
+    
+    #unanswered-list { max-height: 120px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin; scrollbar-color: #ffc107 #fff3cd; }
+    #unanswered-list::-webkit-scrollbar { width: 6px; }
+    #unanswered-list::-webkit-scrollbar-track { background: #fff3cd; border-radius: 10px; }
+    #unanswered-list::-webkit-scrollbar-thumb { background: #ffc107; border-radius: 10px; }
+    #unanswered-list::-webkit-scrollbar-thumb:hover { background: #e0a800; }
+
+    /* Alt Butonlar */
+    .footer-links { display: flex; justify-content: space-between; margin-top: 5px; padding-top: 10px; border-top: 1px solid #eee; }
+    .footer-links a { text-decoration: none; font-weight: bold; font-size: 12px; padding: 8px 12px; border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 5px; }
+    .btn-back { color: #1a2b4c; background-color: #e9ecef; }
+    .btn-back:hover { background-color: #dde2e6; }
+    .btn-logout { color: white; background-color: #d32f2f; }
+    .btn-logout:hover { background-color: #b71c1c; }
+  </style>
+</head>
+<body>
+  <img src="/static/image.png" alt="Ostim Teknik Üniversitesi" class="main-logo">
+  <div class="admin-container">
+      <div class="admin-header">
+          ⚙️ Sistem Yönetimi ve Veri Girişi
+      </div>
+      
+      <div class="admin-body">
+          
+          <!-- YENİ: İstatistik ve Raporlama Dashboard'u -->
+          <div class="dashboard">
+              <div class="stat-card">
+                  <div class="stat-title">📚 Öğretilen Bilgi Sayısı</div>
+                  <div class="stat-value" id="stat-ogretilen">0</div>
+              </div>
+              <div class="stat-card red">
+                  <div class="stat-title">⏳ Bekleyen Soru</div>
+                  <div class="stat-value" style="color: #dc3545;" id="stat-bekleyen">0</div>
+              </div>
+          </div>
+
+          <form action="/admin" method="POST" style="display: flex; flex-direction: column; gap: 20px;">
+              <div>
+                  <label id="soruLabel">Kullanıcının Sorusu (Virgülle ayırarak yazın):</label>
+                  <input type="text" id="question_input" name="question_text" placeholder="Örn: wifi, internet, ağ bağlantısı, eduroam" required>
+              </div>
+
+              <div>
+                  <label>Botun Vereceği Cevap (Detaylı yazabilirsiniz):</label>
+                  <textarea name="answer_text" rows="5" placeholder="Örn: Kampüs internetine bağlanmak için..." required></textarea>
+              </div>
+
+              <button class="submit-btn" type="submit">Veritabanına Kaydet</button>
+          </form>
+
+          <div class="unanswered-box">
+              <h3>🚨 Botun Bilemediği / Öğrencilerin Sorduğu Sorular</h3>
+              <div id="unanswered-list">
+                  <p style="font-size: 14px; color: #666;">Yükleniyor...</p>
+              </div>
+          </div>
+
+          <div class="footer-links">
+              <a href="/" class="btn-back">💬 Chatbot'a Dön</a>
+              <a href="/logout" class="btn-logout">🚪 Çıkış Yap</a>
+          </div>
+      </div>
+  </div>
+
+  <script>
+      // Sayfa açıldığında hem istatistikleri hem de cevapsız soruları getir
+      window.onload = async function() {
+          
+          // 1. İstatistikleri Çek ve Ekrana Yazdır
+          try {
+              const statResponse = await fetch('/api/istatistik');
+              const stats = await statResponse.json();
+              
+              // Rakamları ekrandaki kutulara yerleştir ve animasyonlu sayma efekti verilebilir
+              document.getElementById('stat-ogretilen').innerText = stats.toplam_ogretilen;
+              document.getElementById('stat-bekleyen').innerText = stats.bekleyen_cevapsiz;
+          } catch (error) {
+              console.error("İstatistikler alınamadı", error);
+          }
+
+          // 2. Cevapsız Soruları Çek
+          const response = await fetch('/api/cevapsizlar');
+          const sorular = await response.json();
+          const listDiv = document.getElementById('unanswered-list');
+          
+          if (sorular.length === 0) {
+              listDiv.innerHTML = "<p style='font-size: 14px; color: #28a745;'>Harika! Bekleyen cevapsız soru yok.</p>";
+              return;
+          }
+
+          listDiv.innerHTML = ""; 
+          
+          sorular.forEach(item => {
+              const div = document.createElement('div');
+              div.className = 'question-item';
+              div.innerHTML = `
+                  <span style="font-size: 14px; font-weight: 500;">"${item.soru}"</span>
+                  <div>
+                      <button class="copy-btn" onclick="kopyala('${item.soru}')">Kopyala</button>
+                      <button class="delete-btn" onclick="soruyuSil(${item.id})">Sil</button>
+                  </div>
+              `;
+              listDiv.appendChild(div);
+          });
+      };
+
+      function kopyala(soruMetni) {
+          const input = document.getElementById('question_input');
+          input.value = soruMetni + ", ";
+          input.focus();
+          document.getElementById('soruLabel').scrollIntoView({behavior: "smooth"});
+      }
+
+      async function soruyuSil(id) {
+          if(confirm("Bu kaydı silmek istediğinize emin misiniz?")) {
+              await fetch('/api/cevapsiz_sil', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ id: id })
+              });
+              window.location.reload(); 
+          }
+      }
+      // --- YENİ: SÜRÜKLE VE BIRAK MOTORU (ADMİN İÇİN) ---
+    function dragElement(elmnt, header) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        header.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+            
+            if (window.getComputedStyle(elmnt).position !== 'absolute') {
+                let rect = elmnt.getBoundingClientRect();
+                elmnt.style.position = 'absolute';
+                elmnt.style.left = rect.left + 'px';
+                elmnt.style.top = rect.top + 'px';
+                elmnt.style.margin = '0'; 
+                elmnt.style.zIndex = '1000'; 
+            }
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    // Özelliği admin paneli için çalıştır
+    dragElement(document.querySelector('.admin-container'), document.querySelector('.admin-header'));
+  </script>
+</body>
+</html>

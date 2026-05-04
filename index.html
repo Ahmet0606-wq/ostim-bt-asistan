@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ostim Teknik Üniversitesi Asistanı</title>
+  <style>
+   body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(rgba(26, 43, 76, 0.75), rgba(26, 43, 76, 0.75)), url('/static/logo1.png') no-repeat center center fixed;
+        background-size: cover;
+        display: flex; justify-content: center; align-items: center; 
+        height: 100vh; margin: 0; overflow: hidden; 
+    }
+
+    /* YENİ: Logo Sol Üste Taşındı */
+    .main-logo { 
+        position: fixed; 
+        top: 25px; 
+        left: 30px; 
+        height: 65px; 
+        max-width: 250px; 
+        object-fit: contain; 
+        filter: drop-shadow(0px 3px 10px rgba(0,0,0,0.5)); 
+        z-index: 1000; 
+    }
+
+    .chat-container {
+        width: 400px; height: 600px; background: white; border-radius: 15px; 
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4); display: flex; flex-direction: column; 
+        resize: both; overflow: hidden; min-width: 350px; min-height: 450px; z-index: 10; 
+    }
+
+    .chat-header {
+        background-color: #1a2b4c; color: white; padding: 18px; text-align: center;
+        font-size: 18px; font-weight: bold; border-bottom: 4px solid #f39c12; cursor: move; flex-shrink: 0;
+    }
+
+    #chat-box { flex: 1; padding: 20px; background-color: #f8f9fa; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; scrollbar-width: thin; scrollbar-color: #ccc #f8f9fa; }
+    .message { padding: 12px 18px; border-radius: 15px; max-width: 80%; line-height: 1.4; font-size: 14px; word-wrap: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .user-message { background-color: #f39c12; color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
+    .bot-message { background-color: #ffffff; color: #333; border: 1px solid #e0e0e0; align-self: flex-start; border-bottom-left-radius: 5px; }
+    .quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; align-self: flex-start; }
+    .quick-btn { background-color: #fff; color: #1a2b4c; border: 1px solid #1a2b4c; padding: 8px 12px; border-radius: 15px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out; }
+    .quick-btn:hover { background-color: #1a2b4c; color: white; }
+    .input-area { display: flex; padding: 15px; background: white; border-top: 1px solid #eeeeee; gap: 10px; }
+    input { flex: 1; padding: 12px 15px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 14px; }
+    input:focus { border-color: #1a2b4c; }
+    button.send-btn { background-color: #1a2b4c; color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 14px; transition: all 0.3s; }
+    button.send-btn:hover { background-color: #f39c12; }
+    
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+  </style>
+</head>
+<body>
+
+  <img src="/static/image.png" alt="Ostim Teknik Üniversitesi" class="main-logo">
+
+  <div class="chat-container">
+      <div class="chat-header">🤖 Ostim Teknik BT Asistanı</div>
+      
+      <div id="chat-box">
+          <div class="message bot-message">Merhaba! Ostim Teknik Üniversitesi Bilgi İşlem ve Kampüs Asistanına hoş geldiniz. Size nasıl yardımcı olabilirim?</div>
+          
+          <!-- YENİ: Hızlı Seçenek Butonları -->
+          <div class="quick-replies" id="quick-buttons">
+              <button class="quick-btn" onclick="sendQuickMessage('Wifi ağına nasıl bağlanırım?')">📶 Wi-Fi Bağlantısı</button>
+              <button class="quick-btn" onclick="sendQuickMessage('Laboratuvarda bilgisayar arızası var')">💻 Donanım Arızası</button>
+              <button class="quick-btn" onclick="sendQuickMessage('Öğrenci belgesi nereden alınır?')">📄 Öğrenci Belgesi</button>
+              <button class="quick-btn" onclick="sendQuickMessage('Akademik takvim ve sınavlar')">📅 Akademik Takvim</button>
+          </div>
+      </div>
+      
+      <div class="input-area">
+          <input type="text" id="question" placeholder="Bir soru sorun... (Örn: wifi şifresi)" autocomplete="off">
+          <button class="send-btn" onclick="sendMessage()">Gönder</button>
+      </div>
+  </div>
+
+  <script>
+    // Enter tuşuna basıldığında mesajı gönderme özelliği
+    document.getElementById("question").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // YENİ: Hızlı butonlara tıklanınca çalışacak özel fonksiyon
+    function sendQuickMessage(text) {
+        // Tıklanan metni input kutusuna yazdır ve gönder fonksiyonunu tetikle
+        document.getElementById('question').value = text;
+        sendMessage();
+        
+        // Butonlar tıklandıktan sonra ekrandan kaybolsun ki kalabalık yapmasın
+        document.getElementById('quick-buttons').style.display = 'none';
+    }
+
+    async function sendMessage() {
+      const questionInput = document.getElementById('question');
+      const question = questionInput.value.trim();
+      if (!question) return;
+
+      const chatBox = document.getElementById('chat-box');
+      
+      // Kullanıcının mesajını ekrana bas
+      chatBox.innerHTML += `<div class='message user-message'>${question}</div>`;
+      questionInput.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
+
+        const data = await response.json();
+        
+        // Botun mesajını ekrana bas
+        chatBox.innerHTML += `<div class='message bot-message'>${data.answer}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        chatBox.innerHTML += `<div class='message bot-message' style='color:red;'>⚠️ Bağlantı hatası: ${err.message}</div>`;
+      }
+    }
+    // --- YENİ: SÜRÜKLE VE BIRAK (DRAG & DROP) MOTORU ---
+    function dragElement(elmnt, header) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        header.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            document.onmousemove = elementDrag;
+            
+            // İlk tıklamada paneli esnek yapıdan kurtarıp serbest (absolute) bırakıyoruz
+            if (window.getComputedStyle(elmnt).position !== 'absolute') {
+                let rect = elmnt.getBoundingClientRect();
+                elmnt.style.position = 'absolute';
+                elmnt.style.left = rect.left + 'px';
+                elmnt.style.top = rect.top + 'px';
+                elmnt.style.margin = '0'; 
+                elmnt.style.zIndex = '1000'; // Sürüklerken diğer nesnelerin (logo vb.) üstüne çıkması için
+            }
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // Yeni pozisyonu ayarla
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
+
+    // Sistemi çalıştırıyoruz
+    dragElement(document.querySelector('.chat-container'), document.querySelector('.chat-header'));
+  </script>
+</body>
+</html>

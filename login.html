@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Girişi - Ostim BT</title>
+  <style>
+    /* Kurumsal Arka Plan ve Düzen */
+    body { 
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        background: linear-gradient(rgba(26, 43, 76, 0.75), rgba(26, 43, 76, 0.75)), url('/static/logo1.png') no-repeat center center fixed;
+        background-size: cover; 
+        display: flex; justify-content: center; align-items: center; 
+        height: 100vh; margin: 0; overflow: hidden; 
+    }
+
+    /* Sol Üste Sabitlenmiş Logo */
+    .main-logo { 
+        position: fixed; top: 25px; left: 30px; height: 65px; 
+        max-width: 250px; object-fit: contain; 
+        filter: drop-shadow(0px 3px 10px rgba(0,0,0,0.5)); z-index: 1000; 
+    }
+
+    /* Giriş Paneli Tasarımı */
+    .login-container {
+        width: 400px; background: white; border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4); overflow: hidden;
+        z-index: 10;
+    }
+
+    .login-header {
+        background-color: #1a2b4c; color: white; padding: 20px;
+        text-align: center; font-size: 20px; font-weight: bold;
+        border-bottom: 4px solid #f39c12; 
+    }
+
+    .login-body { padding: 30px; display: flex; flex-direction: column; gap: 20px; }
+
+    label { font-weight: 600; color: #333; font-size: 14px; margin-bottom: 5px; display: block; }
+
+    input {
+        width: 100%; padding: 12px; border: 1px solid #ccc;
+        border-radius: 8px; outline: none; font-size: 15px;
+        box-sizing: border-box; background-color: #f8f9fa; transition: all 0.3s;
+    }
+
+    input:focus { border-color: #1a2b4c; background-color: #fff; box-shadow: 0 0 5px rgba(26, 43, 76, 0.2); }
+
+    .login-btn {
+        background-color: #f39c12; color: white; border: none; padding: 15px;
+        border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px;
+        transition: background-color 0.3s; margin-top: 10px;
+    }
+
+    .login-btn:hover { background-color: #e67e22; }
+
+    .back-link { text-align: center; margin-top: 10px; }
+    .back-link a { color: #1a2b4c; text-decoration: none; font-weight: bold; font-size: 14px; }
+    .back-link a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- Logo Artık Doğru Sınıf Adıyla Çalışıyor -->
+  <img src="/static/image.png" alt="Ostim Teknik Üniversitesi" class="main-logo">
+
+  <div class="login-container">
+      <div class="login-header">🔒 Yönetici Girişi</div>
+      
+      <form class="login-body" action="/login" method="POST">
+          <div>
+              <label>Kullanıcı Adı</label>
+              <input type="text" name="username" placeholder="Kullanıcı adınızı girin" required autocomplete="off">
+          </div>
+
+          <div>
+              <label>Şifre</label>
+              <input type="password" name="password" placeholder="Şifrenizi girin" required>
+          </div>
+
+          <button class="login-btn" type="submit">Sisteme Giriş Yap</button>
+
+          <div class="back-link">
+              <a href="/">💬 Chatbot Ekranına Dön</a>
+          </div>
+      </form>
+  </div>
+
+</body>
+</html>
