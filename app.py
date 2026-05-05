@@ -12,7 +12,7 @@ DB_NAME = "ostim_chatbot.db"
 
 # --- YENİ NESİL YAPAY ZEKA AYARLARI (google-genai) ---
 # Kendi API anahtarını buraya ekle
-API_KEY = "AIzaSyDoMRIRlIlJUF308dyv5GIA2T8KRsM_rms"
+API_KEY = "AIzaSyC07dBpd2HBymnqqpLM6bj6igC0jdn_mvU"
 client = genai.Client(api_key=API_KEY)
 
 # İnternet araması için en stabil ve hızlı model
